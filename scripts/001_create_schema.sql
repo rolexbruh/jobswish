@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS public.resumes (
   state TEXT,
   country TEXT,
   show_jobs_only_in_city BOOLEAN DEFAULT FALSE,
-  embedding VECTOR(1024),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -61,7 +60,6 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   requires_phd BOOLEAN DEFAULT FALSE,
   skills_requirements TEXT,
   description TEXT,
-  embedding VECTOR(1024),
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '60 days')
@@ -190,96 +188,3 @@ CREATE POLICY "rejected_jobs_insert_own" ON public.rejected_jobs FOR INSERT WITH
 -- AI insights usage policies
 CREATE POLICY "ai_insights_select_own" ON public.ai_insights_usage FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "ai_insights_insert_own" ON public.ai_insights_usage FOR INSERT WITH CHECK (user_id = auth.uid());
-
--- Create index for vector similarity search
-CREATE INDEX IF NOT EXISTS resumes_embedding_idx ON public.resumes USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
-CREATE INDEX IF NOT EXISTS jobs_embedding_idx ON public.jobs USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
-
--- Function to match jobs to resume using cosine similarity
-CREATE OR REPLACE FUNCTION match_jobs_to_resume(
-  resume_embedding VECTOR(1024),
-  match_threshold FLOAT DEFAULT 0.5,
-  match_count INT DEFAULT 10
-)
-RETURNS TABLE (
-  id UUID,
-  title TEXT,
-  experience_needed TEXT,
-  salary_min INTEGER,
-  salary_max INTEGER,
-  location_city TEXT,
-  location_state TEXT,
-  location_country TEXT,
-  requires_bachelors BOOLEAN,
-  requires_masters BOOLEAN,
-  requires_phd BOOLEAN,
-  skills_requirements TEXT,
-  description TEXT,
-  recruiter_id UUID,
-  similarity FLOAT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    j.id,
-    j.title,
-    j.experience_needed,
-    j.salary_min,
-    j.salary_max,
-    j.location_city,
-    j.location_state,
-    j.location_country,
-    j.requires_bachelors,
-    j.requires_masters,
-    j.requires_phd,
-    j.skills_requirements,
-    j.description,
-    j.recruiter_id,
-    1 - (j.embedding <=> resume_embedding) AS similarity
-  FROM public.jobs j
-  WHERE j.is_active = TRUE
-    AND j.embedding IS NOT NULL
-    AND 1 - (j.embedding <=> resume_embedding) > match_threshold
-  ORDER BY j.embedding <=> resume_embedding
-  LIMIT match_count;
-END;
-$$;
-
--- Function to match resumes to job using cosine similarity
-CREATE OR REPLACE FUNCTION match_resumes_to_job(
-  job_embedding VECTOR(1024),
-  match_threshold FLOAT DEFAULT 0.3,
-  match_count INT DEFAULT 50
-)
-RETURNS TABLE (
-  id UUID,
-  user_id UUID,
-  name TEXT,
-  email TEXT,
-  whatsapp TEXT,
-  skills_strengths TEXT,
-  experience TEXT,
-  similarity FLOAT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    r.id,
-    r.user_id,
-    r.name,
-    r.email,
-    r.whatsapp,
-    r.skills_strengths,
-    r.experience,
-    1 - (r.embedding <=> job_embedding) AS similarity
-  FROM public.resumes r
-  WHERE r.embedding IS NOT NULL
-    AND 1 - (r.embedding <=> job_embedding) > match_threshold
-  ORDER BY r.embedding <=> job_embedding
-  LIMIT match_count;
-END;
-$$;
