@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Empty } from '@/components/ui/empty'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import { 
   Dialog, 
   DialogContent, 
@@ -81,11 +81,17 @@ export function JobApplicants({ applications, jobId }: JobApplicantsProps) {
 
   if (applications.length === 0) {
     return (
-      <Empty
-        icon={Users}
-        title="No applicants yet"
-        description="Share your job posting to attract candidates"
-      />
+      <Empty className="min-h-[200px]">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Users className="h-6 w-6" />
+          </EmptyMedia>
+          <EmptyTitle>No applicants yet</EmptyTitle>
+          <EmptyDescription>
+            Share your job posting to attract candidates
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     )
   }
 

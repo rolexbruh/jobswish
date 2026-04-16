@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Empty } from '@/components/ui/empty'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
 import { Plus, Briefcase, Users, Eye, MapPin, Clock } from 'lucide-react'
-import type { Profile, Job, Application } from '@/lib/types'
+import type { Profile, Job } from '@/lib/types'
 
 interface JobWithApplicationCount extends Job {
   applications: { count: number }[]
@@ -110,19 +110,25 @@ export default async function RecruiterDashboardPage() {
         </CardHeader>
         <CardContent>
           {typedJobs.length === 0 ? (
-            <Empty
-              icon={Briefcase}
-              title="No jobs posted yet"
-              description="Create your first job posting to start receiving applications"
-              action={
+            <Empty className="min-h-[300px]">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Briefcase className="h-6 w-6" />
+                </EmptyMedia>
+                <EmptyTitle>No jobs posted yet</EmptyTitle>
+                <EmptyDescription>
+                  Create your first job posting to start receiving applications
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
                 <Button asChild>
                   <Link href="/recruiter/jobs/new">
                     <Plus className="h-4 w-4 mr-2" />
                     Post Job
                   </Link>
                 </Button>
-              }
-            />
+              </EmptyContent>
+            </Empty>
           ) : (
             <div className="space-y-3">
               {typedJobs.map((job) => (

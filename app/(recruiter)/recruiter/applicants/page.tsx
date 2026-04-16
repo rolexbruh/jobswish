@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Empty } from '@/components/ui/empty'
-import { Users, Mail, MapPin, ArrowRight } from 'lucide-react'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
+import { Users, ArrowRight } from 'lucide-react'
 import type { Application, Job, Resume, Profile } from '@/lib/types'
 
 interface ApplicationWithDetails extends Application {
@@ -36,14 +36,6 @@ export default async function AllApplicantsPage() {
   const shortlisted = typedApplications.filter(a => a.status === 'shortlisted')
   const rejected = typedApplications.filter(a => a.status === 'rejected')
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'shortlisted': return 'bg-green-500/10 text-green-500 border-green-500/20'
-      case 'rejected': return 'bg-destructive/10 text-destructive border-destructive/20'
-      default: return 'bg-primary/10 text-primary border-primary/20'
-    }
-  }
-
   const ApplicationCard = ({ application }: { application: ApplicationWithDetails }) => (
     <Link
       href={`/recruiter/jobs/${application.job_id}`}
@@ -74,11 +66,17 @@ export default async function AllApplicantsPage() {
       <p className="text-muted-foreground mb-8">View and manage all applications across your jobs</p>
 
       {typedApplications.length === 0 ? (
-        <Empty
-          icon={Users}
-          title="No applicants yet"
-          description="Post jobs to start receiving applications from job seekers"
-        />
+        <Empty className="min-h-[400px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Users className="h-6 w-6" />
+            </EmptyMedia>
+            <EmptyTitle>No applicants yet</EmptyTitle>
+            <EmptyDescription>
+              Post jobs to start receiving applications from job seekers
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Pending */}

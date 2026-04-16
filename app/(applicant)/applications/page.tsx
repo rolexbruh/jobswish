@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Empty } from '@/components/ui/empty'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import { MapPin, DollarSign, Calendar, Briefcase } from 'lucide-react'
 import type { Application, Job } from '@/lib/types'
 
@@ -49,11 +49,17 @@ export default async function ApplicationsPage() {
       <h1 className="text-2xl font-bold mb-6">Your Applications</h1>
 
       {typedApplications.length === 0 ? (
-        <Empty
-          icon={Briefcase}
-          title="No applications yet"
-          description="Start swiping to apply to jobs you're interested in"
-        />
+        <Empty className="min-h-[400px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Briefcase className="h-6 w-6" />
+            </EmptyMedia>
+            <EmptyTitle>No applications yet</EmptyTitle>
+            <EmptyDescription>
+              Start swiping to apply to jobs you&apos;re interested in
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="space-y-4">
           {typedApplications.map((application) => (

@@ -5,9 +5,10 @@ import { AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { JobCard } from './job-card'
 import { Button } from '@/components/ui/button'
-import { Empty } from '@/components/ui/empty'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
 import { X, Heart, RefreshCw, Briefcase } from 'lucide-react'
+import Link from 'next/link'
 import type { Job, Resume } from '@/lib/types'
 
 interface SwipeInterfaceProps {
@@ -106,39 +107,55 @@ export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
 
   if (!resume) {
     return (
-      <Empty
-        icon={Briefcase}
-        title="Complete your profile"
-        description="Create your resume to start swiping on jobs"
-        action={
-          <Button asChild>
-            <a href="/profile">Create Resume</a>
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-center h-full p-4">
+        <Empty className="max-w-md">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Briefcase className="h-6 w-6" />
+            </EmptyMedia>
+            <EmptyTitle>Complete your profile</EmptyTitle>
+            <EmptyDescription>
+              Create your resume to start swiping on jobs
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild>
+              <Link href="/profile">Create Resume</Link>
+            </Button>
+          </EmptyContent>
+        </Empty>
+      </div>
     )
   }
 
   if (jobs.length === 0) {
     return (
-      <Empty
-        icon={Briefcase}
-        title="No more jobs"
-        description="You've seen all available jobs. Check back later for new opportunities!"
-        action={
-          <Button onClick={fetchJobs}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
-        }
-      />
+      <div className="flex items-center justify-center h-full p-4">
+        <Empty className="max-w-md">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Briefcase className="h-6 w-6" />
+            </EmptyMedia>
+            <EmptyTitle>No more jobs</EmptyTitle>
+            <EmptyDescription>
+              You&apos;ve seen all available jobs. Check back later for new opportunities!
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={fetchJobs}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+          </EmptyContent>
+        </Empty>
+      </div>
     )
   }
 
   return (
     <div className="flex flex-col h-full">
       {/* Cards Container */}
-      <div className="flex-1 relative max-w-md mx-auto w-full">
+      <div className="flex-1 relative max-w-md mx-auto w-full p-4">
         <AnimatePresence>
           {jobs.slice(0, 2).map((job, index) => (
             <JobCard

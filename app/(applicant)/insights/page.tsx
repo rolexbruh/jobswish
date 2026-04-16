@@ -5,8 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
-import { Empty } from '@/components/ui/empty'
-import { Sparkles, RefreshCw, User, FileText } from 'lucide-react'
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
+import { Sparkles, FileText, User } from 'lucide-react'
+import Link from 'next/link'
 import type { Resume } from '@/lib/types'
 
 export default function InsightsPage() {
@@ -24,7 +25,7 @@ export default function InsightsPage() {
       if (!user) return
 
       const [resumeResult, usageResult] = await Promise.all([
-        supabase.from('resumes').select('*').eq('user_id', user.id).single(),
+        supabase.from('resumes').select('*').eq('user_id', user.id).maybeSingle(),
         supabase.from('ai_insights_usage').select('*')
           .eq('user_id', user.id)
           .eq('used_at', new Date().toISOString().split('T')[0])
@@ -75,16 +76,22 @@ export default function InsightsPage() {
   if (!resume) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Empty
-          icon={User}
-          title="Complete your profile first"
-          description="Create your resume to get AI-powered insights on improving your job search"
-          action={
+        <Empty className="min-h-[400px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <User className="h-6 w-6" />
+            </EmptyMedia>
+            <EmptyTitle>Complete your profile first</EmptyTitle>
+            <EmptyDescription>
+              Create your resume to get AI-powered insights on improving your job search
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
             <Button asChild>
-              <a href="/profile">Create Resume</a>
+              <Link href="/profile">Create Resume</Link>
             </Button>
-          }
-        />
+          </EmptyContent>
+        </Empty>
       </div>
     )
   }
