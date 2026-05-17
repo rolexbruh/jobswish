@@ -84,7 +84,7 @@ export default function SignUpPage() {
               <Briefcase className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Join JobSwipe</CardTitle>
+          <CardTitle className="text-2xl">Join jobswish</CardTitle>
           <CardDescription>Create an account to start matching</CardDescription>
         </CardHeader>
         <CardContent>

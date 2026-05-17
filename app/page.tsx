@@ -10,7 +10,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Briefcase className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">JobSwipe</span>
+            <span className="text-xl font-bold">jobswish</span>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild>
@@ -34,7 +34,7 @@ export default function HomePage() {
             Find Your Perfect Job Match with a Swipe
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto text-pretty">
-            JobSwipe uses AI to match job seekers with opportunities. Swipe right on jobs you love, and let recruiters find you.
+            jobswish uses AI to match job seekers with opportunities. Swipe right on jobs you love, and let recruiters find you.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Button size="lg" asChild>
@@ -84,7 +84,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} JobSwipe. All rights reserved.
+          &copy; {new Date().getFullYear()} jobswish. All rights reserved.
         </div>
       </footer>
     </div>

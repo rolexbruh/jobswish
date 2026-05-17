@@ -49,7 +49,7 @@ export default function OnboardingPage() {
               <Briefcase className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to JobSwipe</CardTitle>
+          <CardTitle className="text-2xl">Welcome to jobswish</CardTitle>
           <CardDescription>Choose how you want to use the platform</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -7,7 +7,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'JobSwipe - Find Your Perfect Match',
+  title: 'jobswish - Find Your Perfect Job Match',
   description: 'Tinder-style job matching app for applicants and recruiters',
   generator: 'v0.app',
   icons: {
