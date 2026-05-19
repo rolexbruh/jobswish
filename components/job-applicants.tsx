@@ -241,6 +241,14 @@ export function JobApplicants({ applications, jobId, job }: JobApplicantsProps) 
                   </div>
                 </button>
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => viewApplicant(application)}
+                    className="text-primary border-primary/20 hover:bg-primary/10"
+                  >
+                    View Details
+                  </Button>
                   <Badge className={getStatusColor(application.status)}>
                     {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                   </Badge>

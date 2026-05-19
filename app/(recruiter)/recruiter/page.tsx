@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty'
-import { Plus, Briefcase, Users, Eye, MapPin, Clock } from 'lucide-react'
+import { Plus, Briefcase, Users, Eye, MapPin, Clock, Trash2 } from 'lucide-react'
+import { JobsList } from '@/components/jobs-list'
 import type { Profile, Job } from '@/lib/types'
 
 interface JobWithApplicationCount extends Job {
@@ -130,42 +131,7 @@ export default async function RecruiterDashboardPage() {
               </EmptyContent>
             </Empty>
           ) : (
-            <div className="space-y-3">
-              {typedJobs.map((job) => (
-                <Link
-                  key={job.id}
-                  href={`/recruiter/jobs/${job.id}`}
-                  className="block p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold truncate">{job.title}</h3>
-                        <Badge variant={job.is_active ? 'default' : 'secondary'}>
-                          {job.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                        {job.location_city && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {job.location_city}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(job.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold">{job.applications[0]?.count || 0}</p>
-                      <p className="text-xs text-muted-foreground">applicants</p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <JobsList jobs={typedJobs} />
           )}
         </CardContent>
       </Card>
