@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -45,47 +45,37 @@ export function JobApplicants({ applications, jobId, job }: JobApplicantsProps) 
   const router = useRouter()
   const supabase = createClient()
 
-  // Rerank applicants if more than 10
-  useEffect(() => {
-    const rerank = async () => {
-      if (applications.length > 10 && job) {
-        setIsRanking(true)
-        try {
-          const response = await fetch('/api/rerank-applicants', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jobId,
-              applicants: applications,
-              jobDetails: {
-                title: job.title,
-                description: job.description,
-                skills_requirements: job.skills_requirements,
-                experience_needed: job.experience_needed,
-              }
-            })
-          })
-          
-          if (response.ok) {
-            const data = await response.json()
-            setDisplayApplications(data.reranked || applications)
-            setTopApplicantCount(data.topCount || 0)
-          } else {
-            setDisplayApplications(applications)
+  const handleRerank = async () => {
+    if (applications.length < 10 || !job) return
+    
+    setIsRanking(true)
+    try {
+      const response = await fetch('/api/rerank-applicants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId,
+          applicants: applications,
+          jobDetails: {
+            title: job.title,
+            description: job.description,
+            skills_requirements: job.skills_requirements,
+            experience_needed: job.experience_needed,
           }
-        } catch (error) {
-          console.error('[v0] Reranking error:', error)
-          setDisplayApplications(applications)
-        } finally {
-          setIsRanking(false)
-        }
-      } else {
-        setDisplayApplications(applications)
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setDisplayApplications(data.reranked || applications)
+        setTopApplicantCount(data.topCount || 0)
       }
+    } catch (error) {
+      console.error('[v0] Reranking error:', error)
+    } finally {
+      setIsRanking(false)
     }
-
-    rerank()
-  }, [applications, jobId, job])
+  }
 
   const viewApplicant = async (application: ApplicationWithDetails) => {
     setSelectedApplicant(application)
@@ -143,6 +133,19 @@ export function JobApplicants({ applications, jobId, job }: JobApplicantsProps) 
 
   return (
     <>
+      {applications.length >= 10 && (
+        <div className="mb-4 flex items-center gap-2">
+          <Button
+            onClick={handleRerank}
+            disabled={isRanking}
+            variant="outline"
+            className="gap-2"
+          >
+            <Sparkles className={`h-4 w-4 ${isRanking ? 'animate-spin' : ''}`} />
+            {isRanking ? 'Ranking...' : 'AI Rank Applicants'}
+          </Button>
+        </div>
+      )}
       {isRanking && (
         <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-center gap-2 text-sm text-primary">
           <Sparkles className="h-4 w-4 animate-spin" />
