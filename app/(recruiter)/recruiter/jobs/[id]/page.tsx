@@ -133,7 +133,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         <h2 className="text-xl font-bold mb-4">
           Applicants ({typedApplications.length})
         </h2>
-        <JobApplicants applications={typedApplications} jobId={job.id} />
+        <JobApplicants applications={typedApplications} jobId={job.id} job={job} />
       </div>
     </div>
   )

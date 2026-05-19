@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -14,8 +14,8 @@ import {
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/dialog'
-import { Users, Mail, Phone, Github, MapPin, Briefcase, GraduationCap, Check, X, ExternalLink } from 'lucide-react'
-import type { Application, Resume, Profile, Education, WorkExperience } from '@/lib/types'
+import { Users, Mail, Phone, Github, MapPin, Briefcase, GraduationCap, Check, X, ExternalLink, Sparkles } from 'lucide-react'
+import type { Application, Resume, Profile, Education, WorkExperience, Job } from '@/lib/types'
 
 interface ApplicationWithDetails extends Application {
   resume: Resume
@@ -31,15 +31,61 @@ interface ResumeDetails {
 interface JobApplicantsProps {
   applications: ApplicationWithDetails[]
   jobId: string
+  job?: Job
 }
 
-export function JobApplicants({ applications, jobId }: JobApplicantsProps) {
+export function JobApplicants({ applications, jobId, job }: JobApplicantsProps) {
   const [selectedApplicant, setSelectedApplicant] = useState<ApplicationWithDetails | null>(null)
   const [resumeDetails, setResumeDetails] = useState<ResumeDetails | null>(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [displayApplications, setDisplayApplications] = useState<ApplicationWithDetails[]>(applications)
+  const [topApplicantCount, setTopApplicantCount] = useState(0)
+  const [isRanking, setIsRanking] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  // Rerank applicants if more than 10
+  useEffect(() => {
+    const rerank = async () => {
+      if (applications.length > 10 && job) {
+        setIsRanking(true)
+        try {
+          const response = await fetch('/api/rerank-applicants', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jobId,
+              applicants: applications,
+              jobDetails: {
+                title: job.title,
+                description: job.description,
+                skills_requirements: job.skills_requirements,
+                experience_needed: job.experience_needed,
+              }
+            })
+          })
+          
+          if (response.ok) {
+            const data = await response.json()
+            setDisplayApplications(data.reranked || applications)
+            setTopApplicantCount(data.topCount || 0)
+          } else {
+            setDisplayApplications(applications)
+          }
+        } catch (error) {
+          console.error('[v0] Reranking error:', error)
+          setDisplayApplications(applications)
+        } finally {
+          setIsRanking(false)
+        }
+      } else {
+        setDisplayApplications(applications)
+      }
+    }
+
+    rerank()
+  }, [applications, jobId, job])
 
   const viewApplicant = async (application: ApplicationWithDetails) => {
     setSelectedApplicant(application)
@@ -97,8 +143,20 @@ export function JobApplicants({ applications, jobId }: JobApplicantsProps) {
 
   return (
     <>
+      {isRanking && (
+        <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-center gap-2 text-sm text-primary">
+          <Sparkles className="h-4 w-4 animate-spin" />
+          AI Ranking applicants...
+        </div>
+      )}
+      {topApplicantCount > 0 && (
+        <div className="mb-4 p-3 bg-green-500/5 border border-green-500/20 rounded-lg flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+          <Sparkles className="h-4 w-4" />
+          Showing {topApplicantCount} top-ranked applicants from {applications.length} total
+        </div>
+      )}
       <div className="space-y-3">
-        {applications.map((application) => (
+        {displayApplications.map((application) => (
           <Card key={application.id} className="overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
