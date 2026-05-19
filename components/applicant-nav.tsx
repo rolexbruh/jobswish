@@ -38,7 +38,7 @@ export function ApplicantNav() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/swipe" className="flex items-center gap-2">
           <Briefcase className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">JobSwipe</span>
+          <span className="text-xl font-bold">jobswish</span>
         </Link>
 
         {/* Desktop Nav */}

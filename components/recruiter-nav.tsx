@@ -37,7 +37,7 @@ export function RecruiterNav() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/recruiter" className="flex items-center gap-2">
           <Briefcase className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">JobSwipe</span>
+          <span className="text-xl font-bold">jobswish</span>
           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Recruiter</span>
         </Link>
 

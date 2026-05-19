@@ -19,11 +19,15 @@ export default async function ApplicationsPage() {
     redirect('/auth/login')
   }
 
-  const { data: applications } = await supabase
+  const { data: applications, error } = await supabase
     .from('applications')
     .select('*, job:jobs(*)')
     .eq('applicant_id', user.id)
     .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('[v0] Error fetching applications:', error)
+  }
 
   const typedApplications = (applications || []) as ApplicationWithJob[]
 

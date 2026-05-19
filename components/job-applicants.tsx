@@ -14,8 +14,8 @@ import {
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/dialog'
-import { Users, Mail, Phone, Github, MapPin, Briefcase, GraduationCap, Check, X, ExternalLink } from 'lucide-react'
-import type { Application, Resume, Profile, Education, WorkExperience } from '@/lib/types'
+import { Users, Mail, Phone, Github, MapPin, Briefcase, GraduationCap, Check, X, ExternalLink, Sparkles } from 'lucide-react'
+import type { Application, Resume, Profile, Education, WorkExperience, Job } from '@/lib/types'
 
 interface ApplicationWithDetails extends Application {
   resume: Resume
@@ -31,15 +31,105 @@ interface ResumeDetails {
 interface JobApplicantsProps {
   applications: ApplicationWithDetails[]
   jobId: string
+  job?: Job
 }
 
-export function JobApplicants({ applications, jobId }: JobApplicantsProps) {
+export function JobApplicants({ applications, jobId, job }: JobApplicantsProps) {
   const [selectedApplicant, setSelectedApplicant] = useState<ApplicationWithDetails | null>(null)
   const [resumeDetails, setResumeDetails] = useState<ResumeDetails | null>(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [displayApplications, setDisplayApplications] = useState<ApplicationWithDetails[]>(applications)
+  const [topApplicantCount, setTopApplicantCount] = useState(0)
+  const [isRanking, setIsRanking] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  const calculateTopCount = (total: number) => {
+    return Math.max(1, Math.ceil(total / 10))
+  }
+
+  const handleRankAndReject = async () => {
+    if (applications.length < 10 || !job) return
+    
+    setIsRanking(true)
+    try {
+      const response = await fetch('/api/rerank-applicants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId,
+          applicants: applications,
+          jobDetails: {
+            title: job.title,
+            description: job.description,
+            skills_requirements: job.skills_requirements,
+            experience_needed: job.experience_needed,
+          }
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const reranked = data.reranked || applications
+        const topCount = calculateTopCount(applications.length)
+        
+        // Keep top applicants, reject the rest
+        const topApplicants = reranked.slice(0, topCount)
+        const rejectApplicants = reranked.slice(topCount)
+        
+        // Bulk update rejected applicants in database
+        for (const app of rejectApplicants) {
+          await supabase
+            .from('applications')
+            .update({ status: 'rejected' })
+            .eq('id', app.id)
+        }
+        
+        setDisplayApplications(applications.filter(a => 
+          topApplicants.some(t => t.id === a.id)
+        ))
+        setTopApplicantCount(topCount)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('[v0] Rank and reject error:', error)
+    } finally {
+      setIsRanking(false)
+    }
+  }
+
+  const handleRerank = async () => {
+    if (applications.length < 10 || !job) return
+    
+    setIsRanking(true)
+    try {
+      const response = await fetch('/api/rerank-applicants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId,
+          applicants: applications,
+          jobDetails: {
+            title: job.title,
+            description: job.description,
+            skills_requirements: job.skills_requirements,
+            experience_needed: job.experience_needed,
+          }
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setDisplayApplications(data.reranked || applications)
+        setTopApplicantCount(data.topCount || 0)
+      }
+    } catch (error) {
+      console.error('[v0] Reranking error:', error)
+    } finally {
+      setIsRanking(false)
+    }
+  }
 
   const viewApplicant = async (application: ApplicationWithDetails) => {
     setSelectedApplicant(application)
@@ -95,10 +185,42 @@ export function JobApplicants({ applications, jobId }: JobApplicantsProps) {
     )
   }
 
+  const topCount = calculateTopCount(applications.length)
+
   return (
     <>
+      <div className="mb-6 flex items-center justify-between">
+        <div />
+        {applications.length < 10 ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground px-4 py-2 rounded-lg bg-muted/50">
+            You have {applications.length} applicants. You need at least 10 to use this feature.
+          </div>
+        ) : (
+          <Button
+            onClick={handleRankAndReject}
+            disabled={isRanking}
+            variant="default"
+            className="gap-2 bg-primary hover:bg-primary/90"
+          >
+            <Sparkles className={`h-4 w-4 ${isRanking ? 'animate-spin' : ''}`} />
+            {isRanking ? 'Processing...' : `Activate Feature: Rank and Reject 90% (Keep ${topCount})`}
+          </Button>
+        )}
+      </div>
+      {isRanking && (
+        <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-center gap-2 text-sm text-primary">
+          <Sparkles className="h-4 w-4 animate-spin" />
+          AI Ranking applicants...
+        </div>
+      )}
+      {topApplicantCount > 0 && (
+        <div className="mb-4 p-3 bg-green-500/5 border border-green-500/20 rounded-lg flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+          <Sparkles className="h-4 w-4" />
+          Showing {topApplicantCount} top-ranked applicants from {applications.length} total
+        </div>
+      )}
       <div className="space-y-3">
-        {applications.map((application) => (
+        {displayApplications.map((application) => (
           <Card key={application.id} className="overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
@@ -119,6 +241,14 @@ export function JobApplicants({ applications, jobId }: JobApplicantsProps) {
                   </div>
                 </button>
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => viewApplicant(application)}
+                    className="text-primary border-primary/20 hover:bg-primary/10"
+                  >
+                    View Details
+                  </Button>
                   <Badge className={getStatusColor(application.status)}>
                     {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                   </Badge>

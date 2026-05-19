@@ -47,7 +47,7 @@ export default function LoginPage() {
               <Briefcase className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome back to JobSwipe</CardTitle>
+          <CardTitle className="text-2xl">Welcome back to jobswish</CardTitle>
           <CardDescription>Sign in to continue your job search journey</CardDescription>
         </CardHeader>
         <CardContent>
