@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { User, Heart, Sparkles, LogOut, Menu } from 'lucide-react'
+import { Briefcase, User, Heart, Sparkles, LogOut, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -37,7 +37,8 @@ export function ApplicantNav() {
     <header className="border-b border-border bg-background/95 backdrop-blur sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/swipe" className="flex items-center gap-2">
-          <span className="text-xl font-bold">Applyly</span>
+          <Briefcase className="h-6 w-6 text-primary" />
+          <span className="text-xl font-bold">jobswish</span>
         </Link>
 
         {/* Desktop Nav */}

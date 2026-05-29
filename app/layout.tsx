@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Applyly - Find Your Perfect Internship Match',
-  description: 'Tinder-style internship matching platform for students and recruiters',
+  title: 'jobswish - Find Your Perfect Job Match',
+  description: 'Tinder-style job matching app for applicants and recruiters',
   generator: 'v0.app',
   icons: {
     icon: [

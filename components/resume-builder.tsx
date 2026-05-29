@@ -11,7 +11,7 @@ import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, Save, GraduationCap, Briefcase } from 'lucide-react'
-import type { Resume, Education, WorkExperience, InternshipEducation } from '@/lib/types'
+import type { Resume, Education, WorkExperience } from '@/lib/types'
 
 interface ResumeBuilderProps {
   userId: string
@@ -37,40 +37,36 @@ export function ResumeBuilder({
   const [email, setEmail] = useState(initialResume?.email || '')
   const [whatsapp, setWhatsapp] = useState(initialResume?.whatsapp || '')
   const [githubLink, setGithubLink] = useState(initialResume?.github_link || '')
-  const [collegeYear, setCollegeYear] = useState(initialResume?.college_year || '')
+  const [experience, setExperience] = useState(initialResume?.experience || '')
   const [skillsStrengths, setSkillsStrengths] = useState(initialResume?.skills_strengths || '')
   const [projectLinks, setProjectLinks] = useState(initialResume?.project_links || '')
   const [city, setCity] = useState(initialResume?.city || '')
   const [state, setState] = useState(initialResume?.state || '')
   const [country, setCountry] = useState(initialResume?.country || '')
-  const [showInternshipsOnlyInCity, setShowInternshipsOnlyInCity] = useState(initialResume?.show_internships_only_in_city || false)
+  const [showJobsOnlyInCity, setShowJobsOnlyInCity] = useState(initialResume?.show_jobs_only_in_city || false)
 
-  // Internship Education
-  const [internshipEducation, setInternshipEducation] = useState<Partial<InternshipEducation>[]>(
-    initialEducation.length > 0 ? initialEducation.map(e => ({
-      degree_type: e.type === 'phd' ? 'phd' : e.type === 'masters' ? 'master' : 'bachelor',
-      degree_name: e.degree_name,
-      certificate_url: ''
-    })) : [{ degree_type: 'bachelor', degree_name: '' }]
+  // Education
+  const [education, setEducation] = useState<Partial<Education>[]>(
+    initialEducation.length > 0 ? initialEducation : [{ type: 'bachelors', degree_name: '' }]
   )
 
-  // Optional Work experience (for internship seekers)
+  // Work experience
   const [workExperience, setWorkExperience] = useState<Partial<WorkExperience>[]>(
-    initialWorkExperience.length > 0 ? initialWorkExperience : []
+    initialWorkExperience.length > 0 ? initialWorkExperience : [{ role: '', company_name: '' }]
   )
 
-  const addInternshipEducation = () => {
-    setInternshipEducation([...internshipEducation, { degree_type: 'bachelor', degree_name: '' }])
+  const addEducation = () => {
+    setEducation([...education, { type: 'bachelors', degree_name: '' }])
   }
 
-  const removeInternshipEducation = (index: number) => {
-    setInternshipEducation(internshipEducation.filter((_, i) => i !== index))
+  const removeEducation = (index: number) => {
+    setEducation(education.filter((_, i) => i !== index))
   }
 
-  const updateInternshipEducation = (index: number, field: keyof InternshipEducation, value: string) => {
-    const updated = [...internshipEducation]
+  const updateEducation = (index: number, field: keyof Education, value: string) => {
+    const updated = [...education]
     updated[index] = { ...updated[index], [field]: value }
-    setInternshipEducation(updated)
+    setEducation(updated)
   }
 
   const addWorkExperience = () => {
@@ -105,9 +101,9 @@ export function ResumeBuilder({
         const { error } = await supabase
           .from('resumes')
           .update({
-            name, email, whatsapp, github_link: githubLink, college_year: collegeYear,
+            name, email, whatsapp, github_link: githubLink, experience,
             skills_strengths: skillsStrengths, project_links: projectLinks,
-            city, state, country, show_internships_only_in_city: showInternshipsOnlyInCity,
+            city, state, country, show_jobs_only_in_city: showJobsOnlyInCity,
             updated_at: new Date().toISOString()
           })
           .eq('id', resumeId)
@@ -117,8 +113,8 @@ export function ResumeBuilder({
           .from('resumes')
           .insert({
             user_id: userId, name, email, whatsapp, github_link: githubLink,
-            college_year: collegeYear, skills_strengths: skillsStrengths, project_links: projectLinks,
-            city, state, country, show_internships_only_in_city: showInternshipsOnlyInCity
+            experience, skills_strengths: skillsStrengths, project_links: projectLinks,
+            city, state, country, show_jobs_only_in_city: showJobsOnlyInCity
           })
           .select()
           .single()
@@ -132,13 +128,13 @@ export function ResumeBuilder({
         supabase.from('work_experience').delete().eq('resume_id', resumeId)
       ])
 
-      // Insert new internship education entries
-      const validEducation = internshipEducation.filter(e => e.degree_name)
+      // Insert new education entries
+      const validEducation = education.filter(e => e.degree_name)
       if (validEducation.length > 0) {
         await supabase.from('education').insert(
           validEducation.map(e => ({
             resume_id: resumeId,
-            type: e.degree_type === 'phd' ? 'phd' : e.degree_type === 'master' ? 'masters' : 'bachelors',
+            type: e.type,
             degree_name: e.degree_name,
             certificate_url: e.certificate_url
           }))
@@ -221,35 +217,33 @@ export function ResumeBuilder({
               </Field>
             </div>
             <div className="flex items-center gap-3">
-              <Switch checked={showInternshipsOnlyInCity} onCheckedChange={setShowInternshipsOnlyInCity} />
-              <span className="text-sm">Only show internships in my city</span>
+              <Switch checked={showJobsOnlyInCity} onCheckedChange={setShowJobsOnlyInCity} />
+              <span className="text-sm">Only show jobs in my city</span>
             </div>
           </FieldGroup>
         </CardContent>
       </Card>
 
-      {/* College Year & Skills */}
+      {/* Experience & Skills */}
       <Card>
         <CardHeader>
-          <CardTitle>College Year & Skills</CardTitle>
-          <CardDescription>Your current academic year and key strengths</CardDescription>
+          <CardTitle>Experience & Skills</CardTitle>
+          <CardDescription>Tell recruiters about your background</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup>
             <Field>
-              <FieldLabel>College Year</FieldLabel>
-              <Select value={collegeYear} onValueChange={setCollegeYear}>
+              <FieldLabel>Years of Experience</FieldLabel>
+              <Select value={experience} onValueChange={setExperience}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select your year" />
+                  <SelectValue placeholder="Select experience level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1st Year</SelectItem>
-                  <SelectItem value="2">2nd Year</SelectItem>
-                  <SelectItem value="3">3rd Year</SelectItem>
-                  <SelectItem value="4">4th Year</SelectItem>
-                  <SelectItem value="5">5th Year</SelectItem>
-                  <SelectItem value="6">6th Year</SelectItem>
-                  <SelectItem value="7">7th Year</SelectItem>
+                  <SelectItem value="0-1">0-1 years</SelectItem>
+                  <SelectItem value="1-3">1-3 years</SelectItem>
+                  <SelectItem value="3-5">3-5 years</SelectItem>
+                  <SelectItem value="5-10">5-10 years</SelectItem>
+                  <SelectItem value="10+">10+ years</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -275,54 +269,55 @@ export function ResumeBuilder({
         </CardContent>
       </Card>
 
-      {/* Internship Education */}
+      {/* Education */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <GraduationCap className="h-5 w-5" />
-                Internship Education
+                Education
               </CardTitle>
-              <CardDescription>Your degree information for internship matching</CardDescription>
+              <CardDescription>Your academic background</CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={addInternshipEducation}>
+            <Button variant="outline" size="sm" onClick={addEducation}>
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {internshipEducation.map((edu, index) => (
+            {education.map((edu, index) => (
               <div key={index} className="p-4 border border-border rounded-lg space-y-3">
                 <div className="flex items-start justify-between">
-                  <span className="text-sm font-medium">Degree {index + 1}</span>
-                  {internshipEducation.length > 1 && (
-                    <Button variant="ghost" size="sm" onClick={() => removeInternshipEducation(index)}>
+                  <span className="text-sm font-medium">Education {index + 1}</span>
+                  {education.length > 1 && (
+                    <Button variant="ghost" size="sm" onClick={() => removeEducation(index)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Select value={edu.degree_type || ''} onValueChange={(v) => updateInternshipEducation(index, 'degree_type', v)}>
+                  <Select value={edu.type || ''} onValueChange={(v) => updateEducation(index, 'type', v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Degree type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="bachelor">Bachelor&apos;s</SelectItem>
-                      <SelectItem value="master">Master&apos;s</SelectItem>
+                      <SelectItem value="bachelors">Bachelor&apos;s</SelectItem>
+                      <SelectItem value="masters">Master&apos;s</SelectItem>
                       <SelectItem value="phd">PhD</SelectItem>
+                      <SelectItem value="certification">Certification</SelectItem>
                     </SelectContent>
                   </Select>
                   <Input 
                     value={edu.degree_name || ''} 
-                    onChange={(e) => updateInternshipEducation(index, 'degree_name', e.target.value)}
-                    placeholder="Degree name"
+                    onChange={(e) => updateEducation(index, 'degree_name', e.target.value)}
+                    placeholder="Degree / Certificate name"
                   />
                 </div>
                 <Input 
                   value={edu.certificate_url || ''} 
-                  onChange={(e) => updateInternshipEducation(index, 'certificate_url', e.target.value)}
+                  onChange={(e) => updateEducation(index, 'certificate_url', e.target.value)}
                   placeholder="Certificate URL (optional)"
                 />
               </div>
@@ -331,22 +326,20 @@ export function ResumeBuilder({
         </CardContent>
       </Card>
 
-      {/* Work Experience (Optional) */}
+      {/* Work Experience */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5" />
-                Work Experience (Optional)
+                Work Experience
               </CardTitle>
-              <CardDescription>Previous internships or roles (not required)</CardDescription>
+              <CardDescription>Previous roles and companies</CardDescription>
             </div>
-            {workExperience.length > 0 && (
-              <Button variant="outline" size="sm" onClick={addWorkExperience}>
-                <Plus className="h-4 w-4 mr-1" /> Add
-              </Button>
-            )}
+            <Button variant="outline" size="sm" onClick={addWorkExperience}>
+              <Plus className="h-4 w-4 mr-1" /> Add
+            </Button>
           </div>
         </CardHeader>
         <CardContent>

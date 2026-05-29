@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
-import { User, Building2 } from 'lucide-react'
+import { Briefcase, User, Building2 } from 'lucide-react'
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('')
@@ -55,6 +55,11 @@ export default function SignUpPage() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Briefcase className="h-8 w-8 text-primary" />
+              </div>
+            </div>
             <CardTitle className="text-2xl">Check your email</CardTitle>
             <CardDescription>
               We&apos;ve sent you a confirmation link to {email}. Click the link to activate your account.
@@ -74,7 +79,12 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Join Applyly</CardTitle>
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Briefcase className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl">Join jobswish</CardTitle>
           <CardDescription>Create an account to start matching</CardDescription>
         </CardHeader>
         <CardContent>
@@ -94,7 +104,7 @@ export default function SignUpPage() {
                   >
                     <User className={`h-6 w-6 ${role === 'applicant' ? 'text-primary' : 'text-muted-foreground'}`} />
                     <span className={`text-sm font-medium ${role === 'applicant' ? 'text-primary' : 'text-foreground'}`}>
-                      Student
+                      Job Seeker
                     </span>
                   </button>
                   <button
@@ -108,7 +118,7 @@ export default function SignUpPage() {
                   >
                     <Building2 className={`h-6 w-6 ${role === 'recruiter' ? 'text-primary' : 'text-muted-foreground'}`} />
                     <span className={`text-sm font-medium ${role === 'recruiter' ? 'text-primary' : 'text-foreground'}`}>
-                      Company
+                      Recruiter
                     </span>
                   </button>
                 </div>
