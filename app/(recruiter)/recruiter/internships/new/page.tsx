@@ -13,30 +13,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
 
-export default function NewJobPage() {
+export default function NewInternshipPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
-  // Job fields
+  // Internship fields
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [experienceNeeded, setExperienceNeeded] = useState('')
-  const [salaryMin, setSalaryMin] = useState('')
-  const [salaryMax, setSalaryMax] = useState('')
+  const [collegeYear, setCollegeYear] = useState('')
+  const [stipend, setStipend] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
   const [country, setCountry] = useState('')
   const [skillsRequirements, setSkillsRequirements] = useState('')
-  const [requiresBachelors, setRequiresBachelors] = useState(false)
-  const [requiresMasters, setRequiresMasters] = useState(false)
-  const [requiresPhd, setRequiresPhd] = useState(false)
+  const [internshipDegreeType, setInternshipDegreeType] = useState<'undergraduate' | 'postgraduate'>('undergraduate')
+  const [internshipDegreeName, setInternshipDegreeName] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title) {
-      setError('Job title is required')
+      setError('Internship title is required')
       return
     }
 
@@ -53,16 +51,14 @@ export default function NewJobPage() {
       recruiter_id: user.id,
       title,
       description,
-      experience_needed: experienceNeeded || null,
-      salary_min: salaryMin ? parseInt(salaryMin) : null,
-      salary_max: salaryMax ? parseInt(salaryMax) : null,
+      college_year: collegeYear || null,
+      stipend: stipend ? parseInt(stipend) : null,
       location_city: city || null,
       location_state: state || null,
       location_country: country || null,
       skills_requirements: skillsRequirements || null,
-      requires_bachelors: requiresBachelors,
-      requires_masters: requiresMasters,
-      requires_phd: requiresPhd,
+      internship_degree_type: internshipDegreeType,
+      internship_degree_name: internshipDegreeName || null,
       is_active: true
     })
 
@@ -83,23 +79,23 @@ export default function NewJobPage() {
         Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold mb-6">Post a New Job</h1>
+      <h1 className="text-2xl font-bold mb-6">Post a New Internship</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Job Details</CardTitle>
-            <CardDescription>Basic information about the position</CardDescription>
+            <CardTitle>Internship Details</CardTitle>
+            <CardDescription>Basic information about the internship</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
               <Field>
-                <FieldLabel>Job Title *</FieldLabel>
+                <FieldLabel>Internship Title *</FieldLabel>
                 <Input 
                   value={title} 
                   onChange={(e) => setTitle(e.target.value)} 
-                  placeholder="Senior Software Engineer"
+                  placeholder="Summer Internship - Software Engineering"
                 />
               </Field>
               <Field>
@@ -123,53 +119,43 @@ export default function NewJobPage() {
           </CardContent>
         </Card>
 
-        {/* Experience & Education */}
+        {/* Internship Degree Requirements */}
         <Card>
           <CardHeader>
-            <CardTitle>Requirements</CardTitle>
-            <CardDescription>Experience and education requirements</CardDescription>
+            <CardTitle>Internship Degree Requirements</CardTitle>
+            <CardDescription>What degree level is this internship for?</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
               <Field>
-                <FieldLabel>Experience Level</FieldLabel>
-                <Select value={experienceNeeded} onValueChange={setExperienceNeeded}>
+                <FieldLabel>Degree Level</FieldLabel>
+                <Select value={internshipDegreeType} onValueChange={(v) => setInternshipDegreeType(v as 'undergraduate' | 'postgraduate')}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select experience level" />
+                    <SelectValue placeholder="Select degree level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Entry Level (0-1 years)">Entry Level (0-1 years)</SelectItem>
-                    <SelectItem value="Junior (1-3 years)">Junior (1-3 years)</SelectItem>
-                    <SelectItem value="Mid-Level (3-5 years)">Mid-Level (3-5 years)</SelectItem>
-                    <SelectItem value="Senior (5-10 years)">Senior (5-10 years)</SelectItem>
-                    <SelectItem value="Lead (10+ years)">Lead (10+ years)</SelectItem>
+                    <SelectItem value="undergraduate">Undergraduate (Bachelor Only)</SelectItem>
+                    <SelectItem value="postgraduate">Postgraduate (Master, PhD)</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
-              <div className="space-y-3">
-                <p className="text-sm font-medium">Education Requirements</p>
-                <div className="flex items-center gap-3">
-                  <Switch checked={requiresBachelors} onCheckedChange={setRequiresBachelors} />
-                  <span className="text-sm">Bachelor&apos;s degree required</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Switch checked={requiresMasters} onCheckedChange={setRequiresMasters} />
-                  <span className="text-sm">Master&apos;s degree required</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Switch checked={requiresPhd} onCheckedChange={setRequiresPhd} />
-                  <span className="text-sm">PhD required</span>
-                </div>
-              </div>
+              <Field>
+                <FieldLabel>Degree Name</FieldLabel>
+                <Input 
+                  value={internshipDegreeName} 
+                  onChange={(e) => setInternshipDegreeName(e.target.value)} 
+                  placeholder="e.g., Computer Science, Engineering, Business (optional)"
+                />
+              </Field>
             </FieldGroup>
           </CardContent>
         </Card>
 
-        {/* Location & Salary */}
+        {/* Location & Stipend */}
         <Card>
           <CardHeader>
-            <CardTitle>Location & Compensation</CardTitle>
-            <CardDescription>Where is the job and what does it pay?</CardDescription>
+            <CardTitle>Location & Stipend</CardTitle>
+            <CardDescription>Where is the internship and what is the monthly stipend?</CardDescription>
           </CardHeader>
           <CardContent>
             <FieldGroup>
@@ -187,26 +173,15 @@ export default function NewJobPage() {
                   <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="USA" />
                 </Field>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field>
-                  <FieldLabel>Minimum Salary (USD)</FieldLabel>
-                  <Input 
-                    type="number" 
-                    value={salaryMin} 
-                    onChange={(e) => setSalaryMin(e.target.value)} 
-                    placeholder="80000"
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Maximum Salary (USD)</FieldLabel>
-                  <Input 
-                    type="number" 
-                    value={salaryMax} 
-                    onChange={(e) => setSalaryMax(e.target.value)} 
-                    placeholder="120000"
-                  />
-                </Field>
-              </div>
+              <Field>
+                <FieldLabel>Monthly Stipend (USD)</FieldLabel>
+                <Input 
+                  type="number" 
+                  value={stipend} 
+                  onChange={(e) => setStipend(e.target.value)} 
+                  placeholder="5000"
+                />
+              </Field>
             </FieldGroup>
           </CardContent>
         </Card>
@@ -217,7 +192,7 @@ export default function NewJobPage() {
           <div className="ml-auto">
             <Button type="submit" disabled={saving}>
               <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Posting...' : 'Post Job'}
+              {saving ? 'Posting...' : 'Post Internship'}
             </Button>
           </div>
         </div>

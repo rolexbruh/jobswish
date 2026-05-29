@@ -49,13 +49,13 @@ export default async function RecruiterDashboardPage() {
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Recruiter Dashboard</h1>
-          <p className="text-muted-foreground">Manage your job postings and applicants</p>
+          <h1 className="text-2xl font-bold">Company Dashboard</h1>
+          <p className="text-muted-foreground">Manage your internship postings and applicants</p>
         </div>
         <Button asChild>
-          <Link href="/recruiter/jobs/new">
+          <Link href="/recruiter/internships/new">
             <Plus className="h-4 w-4 mr-2" />
-            Post New Job
+            Post New Internship
           </Link>
         </Button>
       </div>
@@ -70,7 +70,7 @@ export default async function RecruiterDashboardPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{activeJobs}</p>
-                <p className="text-sm text-muted-foreground">Active Jobs</p>
+                <p className="text-sm text-muted-foreground">Active Internships</p>
               </div>
             </div>
           </CardContent>
@@ -96,18 +96,18 @@ export default async function RecruiterDashboardPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{typedJobs.length}</p>
-                <p className="text-sm text-muted-foreground">Total Jobs Posted</p>
+                <p className="text-sm text-muted-foreground">Total Internships Posted</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Jobs List */}
+      {/* Internships List */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Job Postings</CardTitle>
-          <CardDescription>Click on a job to view applicants</CardDescription>
+          <CardTitle>Your Internship Postings</CardTitle>
+          <CardDescription>Click on an internship to view applicants</CardDescription>
         </CardHeader>
         <CardContent>
           {typedJobs.length === 0 ? (

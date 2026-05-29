@@ -12,12 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Briefcase, Plus, Users, LogOut, Menu } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Plus, Users, LogOut, Menu } from 'lucide-react'
 
 const navItems = [
-  { href: '/recruiter', label: 'Dashboard', icon: Briefcase },
-  { href: '/recruiter/jobs/new', label: 'Post Job', icon: Plus },
+  { href: '/recruiter', label: 'Dashboard', icon: Plus },
+  { href: '/recruiter/internships/new', label: 'Post Internship', icon: Plus },
   { href: '/recruiter/applicants', label: 'Applicants', icon: Users },
 ]
 
@@ -36,8 +35,7 @@ export function RecruiterNav() {
     <header className="border-b border-border bg-background/95 backdrop-blur sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/recruiter" className="flex items-center gap-2">
-          <Briefcase className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">jobswish</span>
+          <span className="text-xl font-bold">Applyly</span>
           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Recruiter</span>
         </Link>
 

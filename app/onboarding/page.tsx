@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Briefcase, User, Building2 } from 'lucide-react'
+import { User, Building2 } from 'lucide-react'
 
 export default function OnboardingPage() {
   const [role, setRole] = useState<'applicant' | 'recruiter' | null>(null)
@@ -44,12 +44,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Briefcase className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl">Welcome to jobswish</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Applyly</CardTitle>
           <CardDescription>Choose how you want to use the platform</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -67,10 +62,10 @@ export default function OnboardingPage() {
               </div>
               <div className="text-center">
                 <h3 className={`font-semibold ${role === 'applicant' ? 'text-primary' : 'text-foreground'}`}>
-                  Job Seeker
+                  Student
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Find your dream job by swiping
+                  Find your dream internship by swiping
                 </p>
               </div>
             </button>
@@ -87,10 +82,10 @@ export default function OnboardingPage() {
               </div>
               <div className="text-center">
                 <h3 className={`font-semibold ${role === 'recruiter' ? 'text-primary' : 'text-foreground'}`}>
-                  Recruiter
+                  Company
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Post jobs and find candidates
+                  Post internships and find interns
                 </p>
               </div>
             </button>
