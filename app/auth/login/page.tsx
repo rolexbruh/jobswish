@@ -17,53 +17,36 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+    setError(null)
+
     const trimmedEmail = email.trim()
-    if (!trimmedEmail) {
-      setError('Please enter your email')
-      return
-    }
-    
-    if (!validateEmail(trimmedEmail)) {
-      setError('Please enter a valid email address')
-      return
-    }
-    
-    if (!password) {
-      setError('Please enter your password')
+    if (!trimmedEmail || !password) {
+      setError('Email and password are required')
       return
     }
 
     setLoading(true)
-    setError(null)
 
     try {
       const { data: { user }, error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail.toLowerCase(),
+        email: trimmedEmail,
         password,
       })
 
       if (error) {
-        console.error('[v0] Login error:', error.message)
         setError(error.message || 'Invalid email or password')
         setLoading(false)
         return
       }
 
       if (!user) {
-        setError('Login failed. Please try again.')
+        setError('Login failed')
         setLoading(false)
         return
       }
 
-      // Get user role and redirect appropriately
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -77,8 +60,7 @@ export default function LoginPage() {
       }
       router.refresh()
     } catch (err: any) {
-      console.error('[v0] Login exception:', err?.message || err)
-      setError('An unexpected error occurred. Please try again.')
+      setError(err?.message || 'An error occurred')
       setLoading(false)
     }
   }

@@ -20,51 +20,33 @@ export default function SignUpPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Validation
+    setError(null)
+
     if (!role) {
       setError('Please select a role')
       return
     }
-    
+
     const trimmedEmail = email.trim()
-    if (!trimmedEmail) {
-      setError('Please enter your email')
+    if (!trimmedEmail || !password) {
+      setError('Email and password are required')
       return
     }
-    
-    if (!validateEmail(trimmedEmail)) {
-      setError('Please enter a valid email address')
-      return
-    }
-    
-    if (!password) {
-      setError('Please enter a password')
-      return
-    }
-    
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters')
       return
     }
 
     setLoading(true)
-    setError(null)
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL || 
-        (typeof window !== 'undefined' ? window.location.origin : '')
-      const redirectUrl = `${baseUrl}/auth/callback`
+      const redirectUrl = `${window.location.origin}/auth/callback`
 
-      const { data, error } = await supabase.auth.signUp({
-        email: trimmedEmail.toLowerCase(),
+      const { error } = await supabase.auth.signUp({
+        email: trimmedEmail,
         password,
         options: {
           emailRedirectTo: redirectUrl,
@@ -75,18 +57,15 @@ export default function SignUpPage() {
       })
 
       if (error) {
-        console.error('[v0] Signup error:', error.message)
-        setError(error.message || 'Failed to create account. Please try again.')
+        setError(error.message || 'Sign up failed')
         setLoading(false)
         return
       }
 
-      if (data?.user) {
-        setSuccess(true)
-      }
+      setSuccess(true)
+      setLoading(false)
     } catch (err: any) {
-      console.error('[v0] Signup exception:', err?.message || err)
-      setError('An unexpected error occurred. Please try again.')
+      setError(err?.message || 'An error occurred')
       setLoading(false)
     }
   }
