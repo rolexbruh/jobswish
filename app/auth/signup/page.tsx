@@ -26,16 +26,21 @@ export default function SignUpPage() {
       setError('Please select a role')
       return
     }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
     setLoading(true)
     setError(null)
 
     try {
-      const redirectUrl = typeof window !== 'undefined' 
-        ? `${window.location.origin}/auth/callback`
-        : process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || 'http://localhost:3000/auth/callback'
+      // Use absolute URL for email callback
+      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL || 
+        (typeof window !== 'undefined' ? window.location.origin : '')
+      const redirectUrl = `${baseUrl}/auth/callback`
 
-      const { error } = await supabase.auth.signUp({
-        email,
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
         password,
         options: {
           emailRedirectTo: redirectUrl,
@@ -46,15 +51,23 @@ export default function SignUpPage() {
       })
 
       if (error) {
-        console.error('[v0] Signup error:', error)
-        setError(error.message || 'Failed to create account. Please try again.')
+        console.error('[v0] Signup error:', error.message, error.status)
+        if (error.message.includes('email')) {
+          setError('Invalid email address')
+        } else if (error.message.includes('password')) {
+          setError('Password must be at least 6 characters')
+        } else {
+          setError(error.message || 'Failed to create account. Please try again.')
+        }
         setLoading(false)
         return
       }
 
-      setSuccess(true)
-    } catch (err) {
-      console.error('[v0] Signup exception:', err)
+      if (data?.user) {
+        setSuccess(true)
+      }
+    } catch (err: any) {
+      console.error('[v0] Signup exception:', err?.message || err)
       setError('An unexpected error occurred. Please try again.')
       setLoading(false)
     }
