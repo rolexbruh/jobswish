@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
+import { Briefcase } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -19,58 +20,35 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     setError(null)
 
-    const trimmedEmail = email.trim()
-    if (!trimmedEmail || !password) {
-      setError('Email and password are required')
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
       return
     }
 
-    setLoading(true)
-
-    try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password,
-      })
-
-      if (error) {
-        setError(error.message || 'Invalid email or password')
-        setLoading(false)
-        return
-      }
-
-      if (!user) {
-        setError('Login failed')
-        setLoading(false)
-        return
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single()
-
-      if (profile?.role === 'recruiter') {
-        router.push('/recruiter')
-      } else {
-        router.push('/swipe')
-      }
-      router.refresh()
-    } catch (err: any) {
-      setError(err?.message || 'An error occurred')
-      setLoading(false)
-    }
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome back to Applyly</CardTitle>
-          <CardDescription>Sign in to continue your internship journey</CardDescription>
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Briefcase className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl">Welcome back to jobswish</CardTitle>
+          <CardDescription>Sign in to continue your job search journey</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
