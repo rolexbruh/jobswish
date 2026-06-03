@@ -29,25 +29,35 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ?? 
-          `${window.location.origin}/auth/callback`,
-        data: {
-          role,
+    try {
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback`
+        : process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || 'http://localhost:3000/auth/callback'
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            role,
+          },
         },
-      },
-    })
+      })
 
-    if (error) {
-      setError(error.message)
+      if (error) {
+        console.error('[v0] Signup error:', error)
+        setError(error.message || 'Failed to create account. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      setSuccess(true)
+    } catch (err) {
+      console.error('[v0] Signup exception:', err)
+      setError('An unexpected error occurred. Please try again.')
       setLoading(false)
-      return
     }
-
-    setSuccess(true)
   }
 
   if (success) {
