@@ -17,24 +17,42 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) {
-      setError('Please enter email and password')
+    
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      setError('Please enter your email')
       return
     }
+    
+    if (!validateEmail(trimmedEmail)) {
+      setError('Please enter a valid email address')
+      return
+    }
+    
+    if (!password) {
+      setError('Please enter your password')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
     try {
       const { data: { user }, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: trimmedEmail.toLowerCase(),
         password,
       })
 
       if (error) {
         console.error('[v0] Login error:', error.message)
-        setError(error.message || 'Login failed. Please try again.')
+        setError(error.message || 'Invalid email or password')
         setLoading(false)
         return
       }
