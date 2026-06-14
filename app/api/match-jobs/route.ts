@@ -15,12 +15,14 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Get resume data
-    const { data: resume } = await supabase
-      .from('resumes')
-      .select('*')
-      .eq('id', resumeId)
-      .single<Resume>()
+    // Get resume data and education
+    const [resumeResult, educationResult] = await Promise.all([
+      supabase.from('resumes').select('*').eq('id', resumeId).single<Resume>(),
+      supabase.from('education').select('type').eq('resume_id', resumeId)
+    ])
+
+    const resume = resumeResult.data
+    const educationTypes = educationResult.data?.map(e => e.type) || []
 
     if (!resume) {
       return NextResponse.json({ error: 'Resume not found' }, { status: 404 })
@@ -68,13 +70,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Filter by education requirements
+      // Filter by education requirements based on education table
       if (job.requires_phd) {
-        if (resume?.education_type !== 'phd') return false
+        if (!educationTypes.includes('phd')) return false
       } else if (job.requires_masters) {
-        if (!['masters', 'phd'].includes(resume?.education_type || '')) return false
+        if (!educationTypes.some(e => ['masters', 'phd'].includes(e))) return false
       } else if (job.requires_bachelors) {
-        if (!['bachelors', 'masters', 'phd'].includes(resume?.education_type || '')) return false
+        if (!educationTypes.some(e => ['bachelors', 'masters', 'phd'].includes(e))) return false
       }
 
       return true
@@ -89,8 +91,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[v0] Match jobs error:', error)
     return NextResponse.json(
-      { error: 'Failed to match jobs' },
-      { status: 500 }
+      { error: 'Failed to match jobs', jobs: [] },
+      { status: 200 }
     )
   }
 }
