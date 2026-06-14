@@ -26,41 +26,38 @@ export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
     setLoading(true)
     
     try {
-      if (resume?.id) {
-        // Use smart matching API with filters and AI ranking
-        const response = await fetch('/api/match-jobs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            resumeId: resume.id
-          })
-        })
+      // Get rejected and applied job IDs
+      const [rejectedResult, appliedResult] = await Promise.all([
+        supabase.from('rejected_jobs').select('job_id').eq('user_id', userId),
+        supabase.from('applications').select('job_id').eq('applicant_id', userId)
+      ])
 
-        if (response.ok) {
-          const data = await response.json()
-          setJobs(data.jobs || [])
-        } else {
-          setJobs([])
-        }
-      } else {
-        // No resume, fetch basic jobs
-        const { data } = await supabase
-          .from('jobs')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(10)
+      const excludeIds = [
+        ...(rejectedResult.data?.map(r => r.job_id) || []),
+        ...(appliedResult.data?.map(a => a.job_id) || [])
+      ]
 
-        setJobs(data || [])
+      // Fetch active jobs
+      let query = supabase
+        .from('jobs')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (excludeIds.length > 0) {
+        query = query.not('id', 'in', `(${excludeIds.join(',')})`)
       }
+
+      const { data } = await query
+      setJobs(data || [])
     } catch (error) {
       console.error('[v0] Error fetching jobs:', error)
       setJobs([])
     }
     
     setLoading(false)
-  }, [supabase, userId, resume])
+  }, [supabase, userId])
 
   useEffect(() => {
     fetchJobs()
