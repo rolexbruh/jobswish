@@ -7,7 +7,7 @@ import { MapPin, DollarSign, Briefcase, GraduationCap, X, Heart } from 'lucide-r
 import type { Job } from '@/lib/types'
 
 interface JobCardProps {
-  job: Job & { _matchScore?: string }
+  job: Job
   onSwipe: (direction: 'left' | 'right') => void
   isTop?: boolean
 }
@@ -71,28 +71,18 @@ export function JobCard({ job, onSwipe, isTop = false }: JobCardProps) {
 
         <CardContent className="p-6 h-full flex flex-col">
           <div className="flex-1 space-y-4">
-            {/* Match Score and Title */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-balance">{job.title}</h2>
-                {job.company_name && (
-                  <p className="text-sm text-muted-foreground mt-1">{job.company_name}</p>
-                )}
-                {job.location_city && (
-                  <div className="flex items-center gap-1 text-muted-foreground mt-1">
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm">
-                      {[job.location_city, job.location_state, job.location_country]
-                        .filter(Boolean)
-                        .join(', ')}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {job._matchScore && (
-                <Badge className="bg-green-500/20 text-green-600 border-green-500/30 whitespace-nowrap">
-                  {job._matchScore}% Match
-                </Badge>
+            {/* Job Title */}
+            <div>
+              <h2 className="text-2xl font-bold text-balance">{job.title}</h2>
+              {job.location_city && (
+                <div className="flex items-center gap-1 text-muted-foreground mt-1">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">
+                    {[job.location_city, job.location_state, job.location_country]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </span>
+                </div>
               )}
             </div>
 

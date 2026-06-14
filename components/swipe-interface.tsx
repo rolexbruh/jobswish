@@ -25,39 +25,39 @@ export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
   const fetchJobs = useCallback(async () => {
     setLoading(true)
     
-    try {
-      // Get rejected and applied job IDs
-      const [rejectedResult, appliedResult] = await Promise.all([
-        supabase.from('rejected_jobs').select('job_id').eq('user_id', userId),
-        supabase.from('applications').select('job_id').eq('applicant_id', userId)
-      ])
+    // Get rejected and applied job IDs
+    const [rejectedResult, appliedResult] = await Promise.all([
+      supabase.from('rejected_jobs').select('job_id').eq('user_id', userId),
+      supabase.from('applications').select('job_id').eq('applicant_id', userId)
+    ])
 
-      const excludeIds = [
-        ...(rejectedResult.data?.map(r => r.job_id) || []),
-        ...(appliedResult.data?.map(a => a.job_id) || [])
-      ]
+    const excludeIds = [
+      ...(rejectedResult.data?.map(r => r.job_id) || []),
+      ...(appliedResult.data?.map(a => a.job_id) || [])
+    ]
 
-      // Fetch active jobs
-      let query = supabase
-        .from('jobs')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(50)
+    // Fetch active jobs not in exclude list
+    let query = supabase
+      .from('jobs')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(10)
 
-      if (excludeIds.length > 0) {
-        query = query.not('id', 'in', `(${excludeIds.join(',')})`)
-      }
-
-      const { data } = await query
-      setJobs(data || [])
-    } catch (error) {
-      console.error('[v0] Error fetching jobs:', error)
-      setJobs([])
+    if (excludeIds.length > 0) {
+      query = query.not('id', 'in', `(${excludeIds.join(',')})`)
     }
-    
+
+    // Filter by city if user prefers
+    if (resume?.show_jobs_only_in_city && resume.city) {
+      query = query.eq('location_city', resume.city)
+    }
+
+    const { data } = await query
+
+    setJobs(data || [])
     setLoading(false)
-  }, [supabase, userId])
+  }, [supabase, userId, resume])
 
   useEffect(() => {
     fetchJobs()
