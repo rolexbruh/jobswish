@@ -62,21 +62,22 @@ export async function POST(request: NextRequest) {
         if (job.location_city !== resume.city) return false
       }
 
-      // Filter by experience level
-      if (job.experience_needed) {
-        const userExp = resume?.experience || '0-1'
-        if (!matchesExperienceRequirement(userExp, job.experience_needed)) {
+      // Filter by experience level - only if user has set experience
+      if (resume?.experience && job.experience_needed) {
+        if (!matchesExperienceRequirement(resume.experience, job.experience_needed)) {
           return false
         }
       }
 
-      // Filter by education requirements based on education table
-      if (job.requires_phd) {
-        if (!educationTypes.includes('phd')) return false
-      } else if (job.requires_masters) {
-        if (!educationTypes.some(e => ['masters', 'phd'].includes(e))) return false
-      } else if (job.requires_bachelors) {
-        if (!educationTypes.some(e => ['bachelors', 'masters', 'phd'].includes(e))) return false
+      // Filter by education requirements - only filter if user has set education
+      if (educationTypes.length > 0) {
+        if (job.requires_phd) {
+          if (!educationTypes.includes('phd')) return false
+        } else if (job.requires_masters) {
+          if (!educationTypes.some(e => ['masters', 'phd'].includes(e))) return false
+        } else if (job.requires_bachelors) {
+          if (!educationTypes.some(e => ['bachelors', 'masters', 'phd'].includes(e))) return false
+        }
       }
 
       return true
