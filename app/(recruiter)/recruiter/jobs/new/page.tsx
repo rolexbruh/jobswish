@@ -21,6 +21,7 @@ export default function NewJobPage() {
 
   // Job fields
   const [title, setTitle] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [description, setDescription] = useState('')
   const [experienceNeeded, setExperienceNeeded] = useState('')
   const [salaryMin, setSalaryMin] = useState('')
@@ -52,6 +53,7 @@ export default function NewJobPage() {
     const { error } = await supabase.from('jobs').insert({
       recruiter_id: user.id,
       title,
+      company_name: companyName || null,
       description,
       experience_needed: experienceNeeded || null,
       salary_min: salaryMin ? parseInt(salaryMin) : null,
@@ -100,6 +102,14 @@ export default function NewJobPage() {
                   value={title} 
                   onChange={(e) => setTitle(e.target.value)} 
                   placeholder="Senior Software Engineer"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Company Name</FieldLabel>
+                <Input 
+                  value={companyName} 
+                  onChange={(e) => setCompanyName(e.target.value)} 
+                  placeholder="Your Company"
                 />
               </Field>
               <Field>
