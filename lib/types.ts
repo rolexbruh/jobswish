@@ -44,6 +44,7 @@ export interface Job {
   id: string
   recruiter_id: string
   title: string
+  company_name?: string
   experience_needed?: string
   salary_min?: number
   salary_max?: number

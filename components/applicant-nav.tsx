@@ -12,14 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Briefcase, User, Heart, Sparkles, LogOut, Menu } from 'lucide-react'
+import { Briefcase, User, Heart, LogOut, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/swipe', label: 'Swipe', icon: Heart },
   { href: '/applications', label: 'Applications', icon: Briefcase },
   { href: '/profile', label: 'Profile', icon: User },
-  { href: '/insights', label: 'AI Insights', icon: Sparkles },
 ]
 
 export function ApplicantNav() {
