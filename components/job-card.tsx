@@ -74,6 +74,9 @@ export function JobCard({ job, onSwipe, isTop = false }: JobCardProps) {
             {/* Job Title */}
             <div>
               <h2 className="text-2xl font-bold text-balance">{job.title}</h2>
+              {job.company_name && (
+                <p className="text-sm text-muted-foreground font-medium mt-1">{job.company_name}</p>
+              )}
               {job.location_city && (
                 <div className="flex items-center gap-1 text-muted-foreground mt-1">
                   <MapPin className="h-4 w-4" />
