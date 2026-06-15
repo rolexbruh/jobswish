@@ -16,6 +16,17 @@ interface SwipeInterfaceProps {
   resume: Resume | null
 }
 
+// Convert experience string to numeric value
+const getExperienceValue = (experience: string): number => {
+  if (!experience) return 0
+  if (experience.includes('0-1')) return 1
+  if (experience.includes('1-3')) return 2
+  if (experience.includes('3-5')) return 3
+  if (experience.includes('5-10')) return 4
+  if (experience.includes('10+')) return 5
+  return 0
+}
+
 export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,7 +66,18 @@ export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
 
     const { data } = await query
 
-    setJobs(data || [])
+    // Filter by experience level
+    let filteredJobs = data || []
+    if (resume?.experience) {
+      const userExp = getExperienceValue(resume.experience)
+      filteredJobs = filteredJobs.filter(job => {
+        if (!job.experience_needed) return true
+        const jobExp = getExperienceValue(job.experience_needed)
+        return userExp >= jobExp
+      })
+    }
+
+    setJobs(filteredJobs)
     setLoading(false)
   }, [supabase, userId, resume])
 
