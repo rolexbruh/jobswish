@@ -45,6 +45,11 @@ export function ResumeBuilder({
   const [country, setCountry] = useState(initialResume?.country || '')
   const [showJobsOnlyInCity, setShowJobsOnlyInCity] = useState(initialResume?.show_jobs_only_in_city || false)
 
+  // Education level toggles
+  const [hasBachelors, setHasBachelors] = useState(initialEducation.some(e => e.type === 'bachelors'))
+  const [hasMasters, setHasMasters] = useState(initialEducation.some(e => e.type === 'masters'))
+  const [hasPhd, setHasPhd] = useState(initialEducation.some(e => e.type === 'phd'))
+
   // Education
   const [education, setEducation] = useState<Partial<Education>[]>(
     initialEducation.length > 0 ? initialEducation : [{ type: 'bachelors', degree_name: '' }]
@@ -266,6 +271,60 @@ export function ResumeBuilder({
               />
             </Field>
           </FieldGroup>
+          <Field>
+            <FieldLabel>Your Qualifications</FieldLabel>
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={hasBachelors} 
+                  onCheckedChange={(checked) => {
+                    setHasBachelors(checked)
+                    if (checked && !education.some(e => e.type === 'bachelors')) {
+                      setEducation([...education, { type: 'bachelors', degree_name: "Bachelor's Degree" }])
+                    }
+                  }} 
+                />
+                <span className="text-sm">Bachelor's Degree</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={hasMasters} 
+                  onCheckedChange={(checked) => {
+                    setHasMasters(checked)
+                    if (checked) {
+                      setHasBachelors(true)
+                      if (!education.some(e => e.type === 'masters')) {
+                        setEducation([...education, { type: 'masters', degree_name: "Master's Degree" }])
+                      }
+                    }
+                  }} 
+                />
+                <span className="text-sm">Master's Degree</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={hasPhd} 
+                  onCheckedChange={(checked) => {
+                    setHasPhd(checked)
+                    if (checked) {
+                      setHasBachelors(true)
+                      setHasMasters(true)
+                      if (!education.some(e => e.type === 'bachelors')) {
+                        setEducation([...education, { type: 'bachelors', degree_name: "Bachelor's Degree" }])
+                      }
+                      if (!education.some(e => e.type === 'masters')) {
+                        setEducation([...education, { type: 'masters', degree_name: "Master's Degree" }])
+                      }
+                      if (!education.some(e => e.type === 'phd')) {
+                        setEducation([...education, { type: 'phd', degree_name: 'PhD' }])
+                      }
+                    }
+                  }} 
+                />
+                <span className="text-sm">PhD</span>
+              </div>
+            </div>
+          </Field>
         </CardContent>
       </Card>
 

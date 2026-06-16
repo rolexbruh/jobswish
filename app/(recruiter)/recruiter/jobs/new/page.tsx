@@ -34,6 +34,21 @@ export default function NewJobPage() {
   const [requiresMasters, setRequiresMasters] = useState(false)
   const [requiresPhd, setRequiresPhd] = useState(false)
 
+  const handleMastersChange = (checked: boolean) => {
+    setRequiresMasters(checked)
+    if (checked) {
+      setRequiresBachelors(true)
+    }
+  }
+
+  const handlePhDChange = (checked: boolean) => {
+    setRequiresPhd(checked)
+    if (checked) {
+      setRequiresBachelors(true)
+      setRequiresMasters(true)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title) {
@@ -163,11 +178,11 @@ export default function NewJobPage() {
                   <span className="text-sm">Bachelor&apos;s degree required</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Switch checked={requiresMasters} onCheckedChange={setRequiresMasters} />
+                  <Switch checked={requiresMasters} onCheckedChange={handleMastersChange} />
                   <span className="text-sm">Master&apos;s degree required</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Switch checked={requiresPhd} onCheckedChange={setRequiresPhd} />
+                  <Switch checked={requiresPhd} onCheckedChange={handlePhDChange} />
                   <span className="text-sm">PhD required</span>
                 </div>
               </div>

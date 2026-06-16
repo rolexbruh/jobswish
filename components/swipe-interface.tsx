@@ -27,6 +27,14 @@ const getExperienceValue = (experience: string): number => {
   return 0
 }
 
+// Get education level from job's requirements
+const getJobEducationLevel = (job: Job): number => {
+  if (job.requires_phd) return 3
+  if (job.requires_masters) return 2
+  if (job.requires_bachelors) return 1
+  return 0
+}
+
 export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,16 +74,35 @@ export function SwipeInterface({ userId, resume }: SwipeInterfaceProps) {
 
     const { data } = await query
 
-    // Filter by experience level
+    // Filter by experience and education level
     let filteredJobs = data || []
-    if (resume?.experience) {
-      const userExp = getExperienceValue(resume.experience)
-      filteredJobs = filteredJobs.filter(job => {
-        if (!job.experience_needed) return true
+    
+    // Get applicant's education level from education table
+    const [educationResult] = await Promise.all([
+      supabase.from('education').select('type').eq('resume_id', resume?.id || '')
+    ])
+    const educationTypes = educationResult.data?.map(e => e.type) || []
+    let userEducationLevel = 0
+    if (educationTypes.includes('phd')) userEducationLevel = 3
+    else if (educationTypes.includes('masters')) userEducationLevel = 2
+    else if (educationTypes.includes('bachelors')) userEducationLevel = 1
+
+    filteredJobs = filteredJobs.filter(job => {
+      // Filter by experience
+      if (resume?.experience && job.experience_needed) {
+        const userExp = getExperienceValue(resume.experience)
         const jobExp = getExperienceValue(job.experience_needed)
-        return userExp >= jobExp
-      })
-    }
+        if (userExp < jobExp) return false
+      }
+
+      // Filter by education
+      if (userEducationLevel > 0) {
+        const jobEducationLevel = getJobEducationLevel(job)
+        if (jobEducationLevel > 0 && userEducationLevel < jobEducationLevel) return false
+      }
+
+      return true
+    })
 
     setJobs(filteredJobs)
     setLoading(false)
